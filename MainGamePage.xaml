@@ -1,30 +1,114 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+﻿<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="BreakMaster.MainGamePage" >
+             x:Class="BreakMaster.MainGamePage"
+             Title="BreakMaster">
 
     <ScrollView>
-        <VerticalStackLayout
-            Padding="30,0"
-            Spacing="25">
-            <Image
-                Source="dotnet_bot.png"
-                HeightRequest="185"
-                Aspect="AspectFit"
-                SemanticProperties.Description="dot net bot in a race car number eight" />
+        <VerticalStackLayout Padding="20" Spacing="15">
 
-            <Label
-                Text="Hello, World!"
-                Style="{StaticResource Headline}"
-                SemanticProperties.HeadingLevel="Level1" />
+            <!-- Header -->
+            <Label Text="BreakMaster" FontSize="32"
+                   SemanticProperties.HeadingLevel="Level1"
+                   HorizontalOptions="Center" />
 
-            <Label
-                Text="Welcome to &#10;.NET Multi-platform App UI"
-                Style="{StaticResource SubHeadline}"
-                SemanticProperties.HeadingLevel="Level2"
-                SemanticProperties.Description="Welcome to dot net Multi platform App U I" />
+            <Label Text="{Binding CurrentPlayerDisplay}"
+                   FontSize="20"
+                   HorizontalOptions="Center" />
 
+            <!-- Player & Break Info -->
+            <HorizontalStackLayout Spacing="10">
+                <Label Text="P1:" FontAttributes="Bold" />
+                <Label Text="{Binding Player1Score}" />
+
+                <Label Text="P2:" FontAttributes="Bold" />
+                <Label Text="{Binding Player2Score}" />
+
+                <Label Text="Break:" FontAttributes="Bold" />
+                <Label Text="{Binding CurrentBreak}" />
+            </HorizontalStackLayout>
+
+            <!-- Potting Section -->
+            <Label Text="Select Ball to Pot:" FontSize="18" />
+
+            <Grid ColumnDefinitions="*,*,*,*,*,*,*" RowDefinitions="Auto">
+
+                <!-- Red Ball Only -->
+                <Button Text="Red" 
+                        BackgroundColor="Red" 
+                        TextColor="White"
+                        Command="{Binding PotCommand}"
+                        CommandParameter="Red"
+                        Grid.Column="0"
+                        IsVisible="{Binding IsRedVisible}" />
+
+                <!-- Yellow Ball -->
+                <Button Text="Yellow"
+                        BackgroundColor="Yellow"
+                        TextColor="Black"
+                        Command="{Binding PotCommand}"
+                        CommandParameter="Yellow"
+                        Grid.Column="1"
+                        IsVisible="{Binding AreColorsVisible}" />
+
+                <!-- Green Ball -->
+                <Button Text="Green"
+                        BackgroundColor="Green"
+                        TextColor="White"
+                        Command="{Binding PotCommand}"
+                        CommandParameter="Green"
+                        Grid.Column="2"
+                        IsVisible="{Binding AreColorsVisible}" />
+
+                <!-- Brown Ball -->
+                <Button Text="Brown"
+                        BackgroundColor="#8B4513"
+                        TextColor="White"
+                        Command="{Binding PotCommand}"
+                        CommandParameter="Brown"
+                        Grid.Column="3"
+                        IsVisible="{Binding AreColorsVisible}" />
+
+                <!-- Blue Ball -->
+                <Button Text="Blue"
+                        BackgroundColor="Blue"
+                        TextColor="White"
+                        Command="{Binding PotCommand}"
+                        CommandParameter="Blue"
+                        Grid.Column="4"
+                        IsVisible="{Binding AreColorsVisible}" />
+
+                <!-- Pink Ball -->
+                <Button Text="Pink"
+                        BackgroundColor="Pink"
+                        TextColor="Black"
+                        Command="{Binding PotCommand}"
+                        CommandParameter="Pink"
+                        Grid.Column="5"
+                        IsVisible="{Binding AreColorsVisible}" />
+
+                <!-- Black Ball -->
+                <Button Text="Black"
+                        BackgroundColor="Black"
+                        TextColor="White"
+                        Command="{Binding PotCommand}"
+                        CommandParameter="Black"
+                        Grid.Column="6"
+                        IsVisible="{Binding AreColorsVisible}" />
+            </Grid>
+
+
+            <!-- Match Feedback -->
+            <Label Text="Remaining Points: (Coming Soon)"
+                   FontAttributes="Italic" />
+            <Label Text="Fastest Route to Victory: (Coming Soon)"
+                   FontAttributes="Italic" />
+
+            <!-- Action Buttons -->
+            <HorizontalStackLayout Spacing="15">
+                <Button Text="End Break / Switch Turn" Command="{Binding EndBreakCommand}" />
+                <Button Text="Foul" />
+                <Button Text="Toggle In/Out of Play" />
+            </HorizontalStackLayout>
         </VerticalStackLayout>
     </ScrollView>
-
 </ContentPage>
