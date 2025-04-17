@@ -1,6 +1,7 @@
 ﻿<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="BreakMaster.MainGamePage"
+             xmlns:converters="clr-namespace:BreakMaster.Converters"
              Title="BreakMaster">
 
     <ScrollView>
@@ -47,8 +48,14 @@
                         TextColor="Black"
                         Command="{Binding PotCommand}"
                         CommandParameter="Yellow"
-                        Grid.Column="1"
-                        IsVisible="{Binding AreColorsVisible}" />
+                        Grid.Column="1">
+                    <Button.IsVisible>
+                        <MultiBinding Converter="{StaticResource ColourVisibilityMultiConverter}" ConverterParameter="Yellow">
+                            <Binding Path="AreColorsVisible" />
+                            <Binding Path="VisibleFinalColour" />
+                        </MultiBinding>
+                    </Button.IsVisible>
+                </Button>
 
                 <!-- Green Ball -->
                 <Button Text="Green"
@@ -56,8 +63,14 @@
                         TextColor="White"
                         Command="{Binding PotCommand}"
                         CommandParameter="Green"
-                        Grid.Column="2"
-                        IsVisible="{Binding AreColorsVisible}" />
+                        Grid.Column="2">
+                    <Button.IsVisible>
+                        <MultiBinding Converter="{StaticResource ColourVisibilityMultiConverter}" ConverterParameter="Green">
+                            <Binding Path="AreColorsVisible" />
+                            <Binding Path="VisibleFinalColour" />
+                        </MultiBinding>
+                    </Button.IsVisible>
+                </Button>
 
                 <!-- Brown Ball -->
                 <Button Text="Brown"
@@ -65,8 +78,14 @@
                         TextColor="White"
                         Command="{Binding PotCommand}"
                         CommandParameter="Brown"
-                        Grid.Column="3"
-                        IsVisible="{Binding AreColorsVisible}" />
+                        Grid.Column="3">
+                    <Button.IsVisible>
+                        <MultiBinding Converter="{StaticResource ColourVisibilityMultiConverter}" ConverterParameter="Brown">
+                            <Binding Path="AreColorsVisible" />
+                            <Binding Path="VisibleFinalColour" />
+                        </MultiBinding>
+                    </Button.IsVisible>
+                </Button>
 
                 <!-- Blue Ball -->
                 <Button Text="Blue"
@@ -74,8 +93,14 @@
                         TextColor="White"
                         Command="{Binding PotCommand}"
                         CommandParameter="Blue"
-                        Grid.Column="4"
-                        IsVisible="{Binding AreColorsVisible}" />
+                        Grid.Column="4">
+                    <Button.IsVisible>
+                        <MultiBinding Converter="{StaticResource ColourVisibilityMultiConverter}" ConverterParameter="Blue">
+                            <Binding Path="AreColorsVisible" />
+                            <Binding Path="VisibleFinalColour" />
+                        </MultiBinding>
+                    </Button.IsVisible>
+                </Button>
 
                 <!-- Pink Ball -->
                 <Button Text="Pink"
@@ -83,8 +108,14 @@
                         TextColor="Black"
                         Command="{Binding PotCommand}"
                         CommandParameter="Pink"
-                        Grid.Column="5"
-                        IsVisible="{Binding AreColorsVisible}" />
+                        Grid.Column="5">
+                    <Button.IsVisible>
+                        <MultiBinding Converter="{StaticResource ColourVisibilityMultiConverter}" ConverterParameter="Pink">
+                            <Binding Path="AreColorsVisible" />
+                            <Binding Path="VisibleFinalColour" />
+                        </MultiBinding>
+                    </Button.IsVisible>
+                </Button>
 
                 <!-- Black Ball -->
                 <Button Text="Black"
@@ -92,16 +123,24 @@
                         TextColor="White"
                         Command="{Binding PotCommand}"
                         CommandParameter="Black"
-                        Grid.Column="6"
-                        IsVisible="{Binding AreColorsVisible}" />
+                        Grid.Column="6">
+                    <Button.IsVisible>
+                        <MultiBinding Converter="{StaticResource ColourVisibilityMultiConverter}" ConverterParameter="Black">
+                            <Binding Path="AreColorsVisible" />
+                            <Binding Path="VisibleFinalColour" />
+                        </MultiBinding>
+                    </Button.IsVisible>
+                </Button>
             </Grid>
 
-
             <!-- Match Feedback -->
-            <Label Text="Remaining Points: (Coming Soon)"
+            <Label Text="{Binding RemainingPointsDisplay}" 
+                   FontAttributes="Italic" />
+            <Label Text="{Binding RemainingRedsDisplay}" 
                    FontAttributes="Italic" />
             <Label Text="Fastest Route to Victory: (Coming Soon)"
                    FontAttributes="Italic" />
+
 
             <!-- Action Buttons -->
             <HorizontalStackLayout Spacing="15">

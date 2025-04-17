@@ -2,13 +2,21 @@
 <Application xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:BreakMaster"
+             xmlns:converters="clr-namespace:BreakMaster.Converters"
              x:Class="BreakMaster.App">
+
     <Application.Resources>
         <ResourceDictionary>
+
+            <converters:ColourMatchConverter x:Key="ColourMatchConverter" />
+            <converters:ColourVisibilityMultiConverter x:Key="ColourVisibilityMultiConverter" />
+
+
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
                 <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
             </ResourceDictionary.MergedDictionaries>
+
         </ResourceDictionary>
     </Application.Resources>
 </Application>
