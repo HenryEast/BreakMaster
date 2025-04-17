@@ -1,4 +1,6 @@
-﻿namespace BreakMaster.Services
+﻿using System.Windows.Input;
+
+namespace BreakMaster.Services
 {
     public class GameLogicService
     {
@@ -13,19 +15,27 @@
         // ===== Phase Management =====
         private bool awaitingFinalColourAfterLastRed = false;
         private bool inFinalColourSequence = false;
-
-        // ===== Colour Sequence After Reds =====
-        private readonly List<string> finalColourOrder = new()
-        {
-            "Yellow", "Green", "Brown", "Blue", "Pink", "Black"
-        };
+        private readonly List<string> finalColourOrder = new() { "Yellow", "Green", "Brown", "Blue", "Pink", "Black" };
         private int finalColourIndex = 0;
 
-        // ===== Tracking =====
+        // ===== State Tracking =====
         private string lastBallPotted = "";
         public bool RedWasJustPotted { get; private set; } = false;
 
-        // ===== Pot a Ball =====
+        // ===== Free Ball State =====
+        private bool isFreeBallActive = false;
+        private bool freeBallJustPotted = false;
+        public bool IsFreeBallActive => isFreeBallActive;
+
+        // ===== Free Ball Activation =====
+        public void ActivateFreeBall()
+        {
+            SwitchPlayer();
+            isFreeBallActive = true;
+            freeBallJustPotted = false;
+        }
+
+        // ===== Potting Logic =====
         public void PotBall(string ball)
         {
             int points = ball switch
@@ -37,17 +47,34 @@
                 "Blue" => 5,
                 "Pink" => 6,
                 "Black" => 7,
+                "FreeBall" => 0,
                 _ => 0
             };
 
+            if (ball == "FreeBall")
+            {
+                HandleFreeBallPot();
+                return;
+            }
+
+            HandleRegularPot(ball, points);
+        }
+
+        private void HandleFreeBallPot()
+        {
+            freeBallJustPotted = true;
+            isFreeBallActive = false;
+
+            int awardedPoints = RemainingReds > 0 ? 1 : GetCurrentFinalColourPoints();
+            AddPointsToCurrentPlayer(awardedPoints);
+            CurrentBreak += awardedPoints;
+        }
+
+        private void HandleRegularPot(string ball, int points)
+        {
             CurrentBreak += points;
+            AddPointsToCurrentPlayer(points);
 
-            if (CurrentPlayer == 1)
-                Player1Score += points;
-            else
-                Player2Score += points;
-
-            // ===== Handle Logic by Ball Type =====
             if (ball == "Red")
             {
                 RemainingReds--;
@@ -59,73 +86,134 @@
             }
             else if (awaitingFinalColourAfterLastRed)
             {
-                // Colour potted after final red
                 awaitingFinalColourAfterLastRed = false;
                 inFinalColourSequence = true;
                 finalColourIndex = 0;
-                RemainingPoints -= 8;
                 RedWasJustPotted = false;
             }
             else if (inFinalColourSequence && ball == GetNextFinalColour())
             {
-                RemainingPoints -= points;
+                if (!freeBallJustPotted)
+                    RemainingPoints -= points;
+
                 finalColourIndex++;
                 RedWasJustPotted = false;
             }
-            else if (lastBallPotted != "Red")
+            else if (!freeBallJustPotted && lastBallPotted != "Red")
             {
                 RemainingPoints -= points;
                 RedWasJustPotted = false;
             }
             else
             {
-                // Colour potted after a red (before final red) — no deduction
-                RedWasJustPotted = false;
+                RedWasJustPotted = false; // Colour after red — no deduction
             }
 
             lastBallPotted = ball;
+            freeBallJustPotted = false;
         }
 
-        // ===== Validate Potting Option =====
+        private void AddPointsToCurrentPlayer(int points)
+        {
+            if (CurrentPlayer == 1)
+                Player1Score += points;
+            else
+                Player2Score += points;
+        }
+
+        // ===== Rule Checking =====
         public bool CanPot(string ball)
         {
-            if (RemainingReds > 0)
+            if (freeBallJustPotted)
             {
-                return ball == "Red" || lastBallPotted == "Red";
+                if (RemainingReds > 0)
+                    return ball != "Red" && ball != "FreeBall";
+
+                if (awaitingFinalColourAfterLastRed)
+                    return ball != "Red" && ball != "FreeBall";
+
+                if (inFinalColourSequence)
+                    return ball == finalColourOrder[finalColourIndex];
+
+                return false;
             }
+
+            if (RemainingReds > 0)
+                return ball == "Red" || lastBallPotted == "Red";
 
             if (awaitingFinalColourAfterLastRed)
-            {
-                return ball != "Red"; // Any colour allowed
-            }
+                return ball != "Red";
 
             if (inFinalColourSequence && finalColourIndex < finalColourOrder.Count)
-            {
                 return ball == finalColourOrder[finalColourIndex];
-            }
 
             return false;
         }
 
-        // ===== End the Current Break =====
+        // ===== Game Flow =====
         public void EndBreak()
         {
-            // If the final red was potted but colour missed
             if (awaitingFinalColourAfterLastRed)
             {
                 awaitingFinalColourAfterLastRed = false;
                 inFinalColourSequence = true;
                 finalColourIndex = 0;
-                // RemainingPoints -= 8; // Pevious temp fix # Don't deduct points again — already done when red was potted
             }
 
-            RedWasJustPotted = false; // Reset so red is visible again (if reds remain)
-
+            isFreeBallActive = false;
+            freeBallJustPotted = false;
+            RedWasJustPotted = false;
             CurrentBreak = 0;
+            SwitchPlayer();
+        }
+
+        public void ResetMatch()
+        {
+            Player1Score = 0;
+            Player2Score = 0;
+            CurrentBreak = 0;
+            RemainingPoints = 147;
+            RemainingReds = 15;
+            CurrentPlayer = 1;
+
+            awaitingFinalColourAfterLastRed = false;
+            inFinalColourSequence = false;
+            finalColourIndex = 0;
+
+            lastBallPotted = "";
+            RedWasJustPotted = false;
+            isFreeBallActive = false;
+            freeBallJustPotted = false;
+        }
+
+        public void ApplyFoul(int foulPoints, bool switchTurn)
+        {
+            if (CurrentPlayer == 1)
+                Player2Score += foulPoints;
+            else
+                Player1Score += foulPoints;
+
+            if (awaitingFinalColourAfterLastRed)
+            {
+                awaitingFinalColourAfterLastRed = false;
+                inFinalColourSequence = true;
+                finalColourIndex = 0;
+            }
+
+            if (switchTurn)
+                SwitchPlayer();
+
+            isFreeBallActive = false;
+            freeBallJustPotted = false;
+            CurrentBreak = 0;
+        }
+
+        public void SwitchPlayer()
+        {
             CurrentPlayer = (CurrentPlayer == 1) ? 2 : 1;
         }
 
-        // ===== Expose State to ViewModel =====
+        // ===== Helpers =====
         public bool IsAwaitingFinalColourAfterLastRed() => awaitingFinalColourAfterLastRed;
 
         public string GetNextFinalColour()
@@ -136,21 +224,28 @@
             return "";
         }
 
-        // ===== Reset Full Match State =====
-        public void ResetMatch()
+        public bool IsAwaitingColourAfterFreeBall()
         {
-            Player1Score = 0;
-            Player2Score = 0;
-            CurrentBreak = 0;
-            CurrentPlayer = 1;
-            RemainingPoints = 147;
-            RemainingReds = 15;
+            return freeBallJustPotted;
+        }
 
-            awaitingFinalColourAfterLastRed = false;
-            inFinalColourSequence = false;
-            finalColourIndex = 0;
-            lastBallPotted = "";
-            RedWasJustPotted = false;
+        private int GetCurrentFinalColourPoints()
+        {
+            if (inFinalColourSequence && finalColourIndex < finalColourOrder.Count)
+            {
+                string colour = finalColourOrder[finalColourIndex];
+                return colour switch
+                {
+                    "Yellow" => 2,
+                    "Green" => 3,
+                    "Brown" => 4,
+                    "Blue" => 5,
+                    "Pink" => 6,
+                    "Black" => 7,
+                    _ => 0
+                };
+            }
+            return 0;
         }
     }
 }

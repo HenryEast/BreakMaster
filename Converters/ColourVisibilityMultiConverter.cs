@@ -16,13 +16,18 @@ namespace BreakMaster.Converters
             string visibleFinalColour = values[1]?.ToString();
             string thisButtonColour = parameter.ToString();
 
-            // If "AreColorsVisible" is true (e.g. after red): show all
-            if (areColorsVisible)
+            // If not allowed to show colours at all
+            if (!areColorsVisible)
+                return false;
+
+            // If we're allowing any colour (e.g. after potting a red)
+            if (visibleFinalColour == "Any")
                 return true;
 
-            // If in final sequence: only show if colour matches current required one
+            // Otherwise, only show the exact required colour
             return visibleFinalColour == thisButtonColour;
         }
+
 
         public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
             => throw new NotImplementedException();
